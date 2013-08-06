@@ -17,7 +17,7 @@
 #define FRONT_BRAKE 8
 
 #define SERVO_PIN 28
-#define OBSTECALE 12
+#define OBSTECALE 15
 #define COMMENT 
 
 LiquidCrystal lcd(EN, RS, D7, D6, D5, D4);
@@ -25,6 +25,12 @@ LiquidCrystal lcd(EN, RS, D7, D6, D5, D4);
 Servo headServo;
 const int pingPin = 7;
 unsigned angle =0;
+int counterVal=0;
+long duration_0, distance;
+
+boolean fLeft = false;
+boolean fRight = false;
+//boolean beenHere=false;
 
 void setup(){
   lcdSetup();
@@ -37,53 +43,107 @@ void setup(){
 void loop(){
 
   //* CHECKING RIGHT | LEFT | MIDDLE 
-  long duration_180, duration_0,
-      inches_180, RIGHT=0, duration_90,
-      LEFT=0, distance=0, MIDDLE=0;
-
-  for(angle = 10; angle < 180; angle += 20){        
+  long RIGHT=0, LEFT=0, distance=0,
+    MIDDLE=0, FAR_RIGHT=0, FAR_LEFT=0;
+  int count=0;
+  for(angle = 0; angle <= 180; angle += 15){        
     headServo.write(angle);
     delay(65);
     clearSensor();
     pinMode(pingPin, INPUT);
     duration_0 = pulseIn(pingPin, HIGH);
     distance = microsecondsToInches(duration_0);
+    
+    if( distance != 0 && distance < OBSTECALE
+        && count==0 && angle >= 30 && angle < 150 )
+        {
+           STOP();
+           fLeft=false;
+           fRight=false;
+           //beenHere=false;
+           Serial.print("A "); 
+           delay(25);
+           count++;
+        }//if
     Serial.println(distance);
     
-    if( distance != 0 && distance < OBSTECALE && angle > 10 
-              && angle < 80 ) RIGHT++;
-              
+    if(distance != 0 && distance < 6  
+             && angle >= 20 && angle < 30 )
+             {
+               FAR_RIGHT++;
+               //beenHere=false;
+               Serial.print(" ->");
+               Serial.println(angle);
+             }
+
     else if( distance != 0 && distance < OBSTECALE 
-              && angle >= 80 && angle < 120) MIDDLE++;
-              
+              && angle > 30 && angle < 60 )
+             { 
+               Serial.print(" ->");
+               Serial.println(angle);
+               RIGHT++;
+             }
+
     else if( distance != 0 && distance < OBSTECALE 
-              && angle < 170) LEFT++;
-    if( RIGHT || MIDDLE || LEFT ){
-     Serial.print("A ");
-     STOP(); 
-     delay(150);
-    }
-  }
+              && angle >= 60 && angle < 120)
+             {
+               Serial.print(" ->");
+               Serial.println(angle);
+               MIDDLE++;
+             }
+
+    else if( distance != 0 && distance < OBSTECALE 
+             && angle >=120 && angle < 150)
+             {
+               Serial.print(" ->");
+               Serial.println(angle);
+               LEFT++;
+             }
+
+    else if( distance != 0 && distance < 6 
+             && angle >= 150 )
+             {
+               Serial.print(" ->");
+               //beenHere=false;
+               Serial.println(angle);
+               FAR_LEFT++;
+             }
+  }  //for 
+  //headServo.write(10);
+  //delay(5);
   /*TESTING*/
-  Serial.print("RIGHT:");
+  Serial.print("FAR_RIGHT:");
+  Serial.print(FAR_RIGHT);
+  Serial.print(" RIGHT:");
   Serial.print(RIGHT);
   Serial.print(" MIDDLE:");
   Serial.print(MIDDLE);
   Serial.print(" LEFT:");
-  Serial.println(LEFT);
-  
-  
-              /* CHECK IF !=0 && equal */
+  Serial.print(LEFT);
+  Serial.print(" FAR_LEFT:");
+  Serial.println(FAR_LEFT);
+
+              /* CHECK IF !=0 && equal 
+                 RIGHT MIDDLE AND LEFT */
   if( RIGHT && MIDDLE && LEFT){
       Serial.print("1");
       if( RIGHT < LEFT && RIGHT < MIDDLE){
        Serial.print("a");
        //GO RIGHT 
-       reverseAndGo_RIGHT();
+       reverseAndGo_RIGHT(1500);
       }else if( LEFT < RIGHT && LEFT < MIDDLE ){
         Serial.print("b");
        //GO LEFT 
-       reverseAndGo_LEFT();
+       reverseAndGo_LEFT(1500);
+       /* CHECK THESE STATMENTS*/
+      }else if( RIGHT == MIDDLE && RIGHT < LEFT ){
+        //GO RIGHT
+        reverseAndGo_RIGHT(2000);
+        Serial.print("N");
+      }else if( MIDDLE == LEFT && MIDDLE < RIGHT ){
+        //GO LEFT
+        reverseAndGo_LEFT(2000);
+        Serial.print("M");
       }else{
         Serial.print("c");
         //GO BACKWARD AND REVERSE  RIGHT!!!
@@ -91,58 +151,86 @@ void loop(){
        //   A1c
        //RIGHT:2 MIDDLE:1 LEFT:1
        //A1c
-        goBackward(200);
-        reverseAndGo_LEFT();
+        goBackward(500);
+        reverseAndGo_LEFT(2000);
       }
   }else if( RIGHT && MIDDLE ){
         Serial.print("2");
      if( RIGHT < MIDDLE ){
        Serial.print("d");
       //GO RIGHT
-      reverseAndGo_RIGHT();
+      reverseAndGo_RIGHT(1500);
      }else{  //includes equal
      Serial.print("e");
       //GO LEFT
-      reverseAndGo_LEFT();
+      reverseAndGo_LEFT(1500);
      }
     }else if( LEFT && MIDDLE ){
           Serial.print("3");
       if( LEFT < MIDDLE ){
         Serial.print("f");
        //GO LEFT
-       reverseAndGo_LEFT();
+       reverseAndGo_LEFT(1500);
       }else{  //includes equal
         Serial.print("g");
        //GO RIGHT
-       reverseAndGo_RIGHT();
+       reverseAndGo_RIGHT(1500);
       }
   }else if( LEFT && RIGHT ){
       Serial.print("4");
      if( LEFT < RIGHT ){
        Serial.print("h");
         //GO LEFT
-        reverseAndGo_LEFT();
+        reverseAndGo_LEFT(1500);
       }else{  //includes equal
         Serial.print("i");
        //GO RIGHT 
-         reverseAndGo_RIGHT();
+         reverseAndGo_RIGHT(1500);
       }
   }else if( RIGHT ){
       Serial.print("5");
       //GO LEFT
-      reverseAndGo_LEFT();
+      reverseAndGo_LEFT(1500);
   }else if( MIDDLE ){
       Serial.print("6");
      //GO EITHER WAY  ????
-     reverseAndGo_RIGHT();
+     reverseAndGo_RIGHT(1500);
   }else if( LEFT ){
      Serial.print("7");
      //GO RIGHT 
-   reverseAndGo_RIGHT();
-  }else{
+   reverseAndGo_RIGHT(1500);
+  }else if( FAR_RIGHT || FAR_LEFT ){
     Serial.print("8");
+    if( FAR_RIGHT < FAR_LEFT ){
+      Serial.print("j");
+      if(fLeft==true){
+        Serial.print("z");
+        reverseAndGo_RIGHT(1000);
+      }else{
+        Serial.print("l");
+          fLeft=true;
+          //merge right
+          turnRight();
+          delay(500);
+          goFORWARD();
+      }
+    }else{
+      Serial.print("k");
+      if(fRight==true){
+        reverseAndGo_LEFT(1000);
+      }else{
+        Serial.print("y");
+         fRight=true;
+         //merge left 
+         turnLeft();
+         delay(500);
+         goFORWARD();
+      }
+    }
+  }else{
+    Serial.print("9");
      //GO FORAWRD
-   goFORWARD();
+     goFORWARD();
   }
       Serial.println();
       Serial.println();
@@ -178,17 +266,55 @@ void goFORWARD(){
   digitalWrite(FRONT_BRAKE, HIGH);
   analogWrite(3,200);  //activate drive motor
   digitalWrite(BACK_MOTOR, HIGH);
+  check90();
 }
-void reverseAndGo_LEFT(){
+          /*CHECK THIS AGAIN*/
+void check90(){
+  for(angle = 60; angle >= 130; angle += 15){        
+    headServo.write(angle);
+    delay(65);
+    clearSensor();
+    pinMode(pingPin, INPUT);
+    duration_0 = pulseIn(pingPin, HIGH);
+    distance = microsecondsToInches(duration_0);
+    if( distance != 0 && angle > 95 && angle < 115
+          && distance < 20 )
+    {
+      STOP();
+      Serial.println("    < 20");
+      //beenHere=true;
+    }
+    else goFORWARD();
+  }/*
+  headServo.write(110);
+  delay(5);
+  long duration_0, distance;
+  delay(25);
+  clearSensor();
+  pinMode(pingPin, INPUT);
+  duration_0 = pulseIn(pingPin, HIGH);
+  distance = microsecondsToInches(duration_0);
+  Serial.print(" check90: ");
+  Serial.println(distance);
+  if( distance != 0 && distance < 20 ){
+    STOP();
+    Serial.println("    < 20");
+    beenHere=true;
+  }else if(beenHere){
+    goBackward(500);
+    reverseAndGo_LEFT(2000);
+  }else goFORWARD();*/
+}
+void reverseAndGo_LEFT(int sec){
  delay(75);
  turnRight();
- goBackward(750);
+ goBackward(sec);
  STOP(); 
 }
-void reverseAndGo_RIGHT(){
+void reverseAndGo_RIGHT(int sec){
  delay(75);
  turnLeft();
- goBackward(750);
+ goBackward(sec);
  STOP();
 }
 void STOP(){
@@ -215,6 +341,6 @@ void carSetupAndStart(){
   pinMode(FRONT_MOTOR, OUTPUT);
   pinMode(BACK_BRAKE, OUTPUT);
   pinMode(FRONT_BRAKE, OUTPUT); 
-  
+  counterVal++;
   goFORWARD();
 }

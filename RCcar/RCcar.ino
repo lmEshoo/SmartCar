@@ -54,17 +54,24 @@ void loop(){
     duration_0 = pulseIn(pingPin, HIGH);
     distance = microsecondsToInches(duration_0);
     
-    if( distance != 0 && distance < 30
-        && count==0 && angle >= 30 && angle < 150 )
+    if( distance != 0 && distance < 20
+         && angle >= 30 && angle < 150 )
         {
+       
            STOP();
            fLeft=false;
            fRight=false;
            //beenHere=false;
            Serial.print("A ");
-           delay(25);
-           count++;
+           //delay(25);
+           //count++;
         }//if
+    if( distance != 0 && angle > 75 && angle < 125
+      && distance < 30 )//checking middle
+      {
+         STOP();
+         Serial.print("M ");
+      }
     Serial.println(distance);
     
     if(distance != 0 && distance < 10  
@@ -143,7 +150,7 @@ void loop(){
       }else if( MIDDLE == LEFT && MIDDLE < RIGHT ){
         //GO LEFT
         reverseAndGo_LEFT(2000);
-        Serial.print("M");
+        Serial.print("m");
       }else{
         Serial.print("c");
         //GO BACKWARD AND REVERSE  RIGHT!!!

@@ -30,6 +30,7 @@ long duration_0, distance;
 
 boolean fLeft = false;
 boolean fRight = false;
+boolean forWard = false;
 //boolean beenHere=false;
 
 void setup(){
@@ -46,32 +47,33 @@ void loop(){
   long RIGHT=0, LEFT=0, distance=0,
     MIDDLE=0, FAR_RIGHT=0, FAR_LEFT=0;
   int count=0;
-  for(angle = 0; angle <= 180; angle += 15){        
+  for(angle = 5; angle <= 175; angle += 15){        
     headServo.write(angle);
     delay(65);
     clearSensor();
     pinMode(pingPin, INPUT);
     duration_0 = pulseIn(pingPin, HIGH);
     distance = microsecondsToInches(duration_0);
-    
-    if( distance != 0 && distance < 20
-         && angle >= 30 && angle < 150 )
+    //if go forward is up do V
+    if( distance != 0 && angle > 75 && angle < 125
+        && distance < 30 && forWard==true )//checking middle
+    {
+       STOP();
+       Serial.print("M ");
+    }
+    if( distance != 0 && distance < 15
+         && ( (angle >= 30 && angle < 75) 
+         ||   (angle > 125 && angle < 150) ) )
         {
-       
            STOP();
+           forWard=false;
            fLeft=false;
            fRight=false;
            //beenHere=false;
            Serial.print("A ");
-           //delay(25);
-           //count++;
         }//if
-    if( distance != 0 && angle > 75 && angle < 125
-      && distance < 30 )//checking middle
-      {
-         STOP();
-         Serial.print("M ");
-      }
+    
+    
     Serial.println(distance);
     
     if(distance != 0 && distance < 10  
@@ -269,9 +271,10 @@ void turnRight(){
   analogWrite(11, 255);  //activate turn motor
 }  //turnRight()
 void goFORWARD(){
+  forWard=true;
   digitalWrite(BACK_BRAKE, LOW);
   digitalWrite(FRONT_BRAKE, HIGH);
-  analogWrite(3,150);  //activate drive motor w/ 150 speed
+  analogWrite(3,175);  //activate drive motor w/ 175 speed
   digitalWrite(BACK_MOTOR, HIGH);
   check90();
 }

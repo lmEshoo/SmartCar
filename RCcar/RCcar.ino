@@ -54,20 +54,20 @@ void loop(){
     duration_0 = pulseIn(pingPin, HIGH);
     distance = microsecondsToInches(duration_0);
     
-    if( distance != 0 && distance < OBSTECALE
+    if( distance != 0 && distance < 20
         && count==0 && angle >= 30 && angle < 150 )
         {
            STOP();
            fLeft=false;
            fRight=false;
            //beenHere=false;
-           Serial.print("A "); 
+           Serial.print("A ");
            delay(25);
            count++;
         }//if
     Serial.println(distance);
     
-    if(distance != 0 && distance < 6  
+    if(distance != 0 && distance < 10  
              && angle >= 20 && angle < 30 )
              {
                FAR_RIGHT++;
@@ -84,7 +84,7 @@ void loop(){
                RIGHT++;
              }
 
-    else if( distance != 0 && distance < OBSTECALE 
+    else if( distance != 0 && distance < 25 
               && angle >= 60 && angle < 120)
              {
                Serial.print(" ->");
@@ -100,7 +100,7 @@ void loop(){
                LEFT++;
              }
 
-    else if( distance != 0 && distance < 6 
+    else if( distance != 0 && distance < 10 
              && angle >= 150 )
              {
                Serial.print(" ->");
@@ -270,15 +270,15 @@ void goFORWARD(){
 }
           /*CHECK THIS AGAIN*/
 void check90(){
-  for(angle = 60; angle >= 130; angle += 15){        
+  for(angle = 70; angle >= 130; angle += 15){        
     headServo.write(angle);
     delay(65);
     clearSensor();
     pinMode(pingPin, INPUT);
     duration_0 = pulseIn(pingPin, HIGH);
     distance = microsecondsToInches(duration_0);
-    if( distance != 0 && angle > 95 && angle < 115
-          && distance < 20 )
+    if( distance != 0 && angle > 75 && angle < 125
+          && distance < 35 )
     {
       STOP();
       Serial.println("    < 20");

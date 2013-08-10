@@ -54,7 +54,7 @@ void loop(){
     duration_0 = pulseIn(pingPin, HIGH);
     distance = microsecondsToInches(duration_0);
     
-    if( distance != 0 && distance < 20
+    if( distance != 0 && distance < 30
         && count==0 && angle >= 30 && angle < 150 )
         {
            STOP();
@@ -210,8 +210,8 @@ void loop(){
         Serial.print("l");
           fLeft=true;
           //merge right
+          delay(25);
           turnRight();
-          delay(500);
           goFORWARD();
       }
     }else{
@@ -222,8 +222,8 @@ void loop(){
         Serial.print("y");
          fRight=true;
          //merge left 
+         delay(25);
          turnLeft();
-         delay(500);
          goFORWARD();
       }
     }
@@ -247,7 +247,7 @@ void clearSensor(){
 
 void goBackward( int sec ){
   digitalWrite(BACK_BRAKE, LOW); 
-  analogWrite(3, 200);  //activate drive motor
+  analogWrite(3, 200);  //activate drive motor w/ 200 speed
   digitalWrite(BACK_MOTOR, LOW);
   delay(sec); 
 }
@@ -264,7 +264,7 @@ void turnRight(){
 void goFORWARD(){
   digitalWrite(BACK_BRAKE, LOW);
   digitalWrite(FRONT_BRAKE, HIGH);
-  analogWrite(3,200);  //activate drive motor
+  analogWrite(3,150);  //activate drive motor w/ 150 speed
   digitalWrite(BACK_MOTOR, HIGH);
   check90();
 }

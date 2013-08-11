@@ -39,6 +39,7 @@ long duration_0, distance;
 boolean fLeft = false;
 boolean fRight = false;
 boolean forWard = false;
+boolean forwardAgain = false;
 //boolean beenHere=false;
 
 void setup(){
@@ -130,7 +131,7 @@ void loop(){
   //headServo.write(10);
   //delay(5);
   /*TESTING*/
-  Serial.print("FAR_RIGHT:");
+  /*Serial.print("FAR_RIGHT:");
   Serial.print(FAR_RIGHT);
   Serial.print(" RIGHT:");
   Serial.print(RIGHT);
@@ -140,7 +141,7 @@ void loop(){
   Serial.print(LEFT);
   Serial.print(" FAR_LEFT:");
   Serial.println(FAR_LEFT);
-
+  */
               /* CHECK IF !=0 && equal 
                  RIGHT MIDDLE AND LEFT */
   if( RIGHT && MIDDLE && LEFT){
@@ -268,6 +269,7 @@ void goBackward( int sec ){
   analogWrite(3, 200);  //activate drive motor w/ 200 speed
   digitalWrite(BACK_MOTOR, LOW);
   delay(sec); 
+  forwardAgain=false;
 }
 void turnLeft(){
   digitalWrite(FRONT_BRAKE, LOW);
@@ -283,15 +285,20 @@ void goFORWARD(){
   forWard=true;
   digitalWrite(BACK_BRAKE, LOW);
   digitalWrite(FRONT_BRAKE, HIGH);
-  analogWrite(3,255);  //activate drive motor w/ 200 speed
   digitalWrite(BACK_MOTOR, HIGH);
+  if(forwardAgain==true){
+    analogWrite(3,190);
+  }else{
+    analogWrite(3,255);  //activate SFast
+    forwardAgain=true;
+  }
   check90();
 }
           /*CHECK THIS AGAIN*/
 void check90(){
-  for(angle = 70; angle >= 130; angle += 15){        
+  for(angle = 70; angle >= 130; angle += 5){        
     headServo.write(angle);
-    delay(65);
+    delay(25);
     clearSensor();
     pinMode(pingPin, INPUT);
     duration_0 = pulseIn(pingPin, HIGH);
@@ -300,7 +307,7 @@ void check90(){
           && distance < 35 )
     {
       STOP();
-      Serial.println("    < 20");
+      Serial.println("    < 35");
       //beenHere=true;
     }
     else goFORWARD();

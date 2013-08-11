@@ -16,6 +16,14 @@
 #define BACK_BRAKE 9
 #define FRONT_BRAKE 8
 
+//lights 30,31,32,33,34,35
+#define LED_RED_1 34
+#define LED_RED_2 32
+#define LED_RED_3 30
+#define LED_GRE_1 35
+#define LED_GRE_2 33
+#define LED_GRE_3 31
+
 #define SERVO_PIN 28
 #define OBSTECALE 15
 #define COMMENT 
@@ -42,7 +50,8 @@ void setup(){
 }  //setup
 
 void loop(){
-
+  //ledFORWARD();
+  
   //* CHECKING RIGHT | LEFT | MIDDLE 
   long RIGHT=0, LEFT=0, distance=0,
     MIDDLE=0, FAR_RIGHT=0, FAR_LEFT=0;
@@ -61,7 +70,7 @@ void loop(){
        STOP();
        Serial.print("M ");
     }
-    if( distance != 0 && distance < 15
+    else if( distance != 0 && distance < OBSTECALE
          && ( (angle >= 30 && angle < 75) 
          ||   (angle > 125 && angle < 150) ) )
         {
@@ -274,7 +283,7 @@ void goFORWARD(){
   forWard=true;
   digitalWrite(BACK_BRAKE, LOW);
   digitalWrite(FRONT_BRAKE, HIGH);
-  analogWrite(3,175);  //activate drive motor w/ 175 speed
+  analogWrite(3,255);  //activate drive motor w/ 200 speed
   digitalWrite(BACK_MOTOR, HIGH);
   check90();
 }
@@ -351,6 +360,49 @@ void carSetupAndStart(){
   pinMode(FRONT_MOTOR, OUTPUT);
   pinMode(BACK_BRAKE, OUTPUT);
   pinMode(FRONT_BRAKE, OUTPUT); 
+  
+  pinMode(LED_RED_1, OUTPUT); 
+  pinMode(LED_RED_2, OUTPUT); 
+  pinMode(LED_RED_3, OUTPUT); 
+  pinMode(LED_GRE_1, OUTPUT); 
+  pinMode(LED_GRE_2, OUTPUT); 
+  pinMode(LED_GRE_3, OUTPUT); 
+  
+  ledAll_ON();
+  delay(500);
+  ledAll_OFF();
+  delay(750);
+  ledAll_ON();
+  
   counterVal++;
   goFORWARD();
+}
+
+void ledAll_ON(){
+  digitalWrite(LED_GRE_1,HIGH);
+  digitalWrite(LED_GRE_2,HIGH);
+  digitalWrite(LED_GRE_3,HIGH);
+  digitalWrite(LED_RED_1,HIGH);
+  digitalWrite(LED_RED_2,HIGH);
+  digitalWrite(LED_RED_3,HIGH);
+}
+void ledAll_OFF(){
+  digitalWrite(LED_GRE_1,LOW);
+  digitalWrite(LED_GRE_2,LOW);
+  digitalWrite(LED_GRE_3,LOW);
+  digitalWrite(LED_RED_1,LOW);
+  digitalWrite(LED_RED_2,LOW);
+  digitalWrite(LED_RED_3,LOW);
+}
+void ledFORWARD(){
+  digitalWrite(LED_GRE_1,HIGH);
+  digitalWrite(LED_GRE_3,HIGH);
+  digitalWrite(LED_RED_1,HIGH);
+  digitalWrite(LED_RED_3,HIGH);
+  
+  digitalWrite(LED_GRE_2,LOW);
+  digitalWrite(LED_RED_2,LOW);
+  delay(500);
+  digitalWrite(LED_GRE_2,HIGH);
+  digitalWrite(LED_RED_2,HIGH);
 }

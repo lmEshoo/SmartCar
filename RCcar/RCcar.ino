@@ -25,7 +25,7 @@
 #define LED_GRE_3 31
 
 #define SERVO_PIN 28
-#define OBSTECALE 15
+#define OBSTECALE 12
 #define COMMENT 
 
 LiquidCrystal lcd(EN, RS, D7, D6, D5, D4);
@@ -59,6 +59,9 @@ void loop(){
   int count=0;
   for(angle = 5; angle <= 175; angle += 15){        
     headServo.write(angle);
+    //Serial.println();
+    //Serial.print("ANGLE: ");
+    //Serial.println(angle);
     delay(65);
     clearSensor();
     pinMode(pingPin, INPUT);
@@ -71,7 +74,7 @@ void loop(){
        STOP();
        Serial.print("M ");
     }
-    else if( distance != 0 && distance < OBSTECALE
+    else if( distance != 0 && distance < 15
          && ( (angle >= 30 && angle < 75) 
          ||   (angle > 125 && angle < 150) ) )
         {
@@ -287,9 +290,9 @@ void goFORWARD(){
   digitalWrite(FRONT_BRAKE, HIGH);
   digitalWrite(BACK_MOTOR, HIGH);
   if(forwardAgain==true){
-    analogWrite(3,190);
+    analogWrite(3,175);
   }else{
-    analogWrite(3,255);  //activate SFast
+    analogWrite(3,225);  //activate SFast
     forwardAgain=true;
   }
   check90();
@@ -298,7 +301,7 @@ void goFORWARD(){
 void check90(){
   for(angle = 70; angle >= 130; angle += 5){        
     headServo.write(angle);
-    delay(25);
+    delay(15);
     clearSensor();
     pinMode(pingPin, INPUT);
     duration_0 = pulseIn(pingPin, HIGH);

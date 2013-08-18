@@ -31,7 +31,7 @@
 LiquidCrystal lcd(EN, RS, D7, D6, D5, D4);
 
 Servo headServo;
-const int pingPin = 7;
+const int PINGpin = 7;
 unsigned angle =0;
 int counterVal=0;
 long duration_0, distance;
@@ -57,36 +57,190 @@ void loop(){
   long RIGHT=0, LEFT=0, distance=0,
     MIDDLE=0, FAR_RIGHT=0, FAR_LEFT=0;
   int count=0;
-  for(angle = 5; angle <= 175; angle += 15){        
+  //obsCheck();
+  
+  
+  
+  //going backwards_servo
+  for(angle = 5; angle <= 175; angle += 15){
     headServo.write(angle);
-    //Serial.println();
-    //Serial.print("ANGLE: ");
-    //Serial.println(angle);
-    delay(65);
+    delay(17);
     clearSensor();
-    pinMode(pingPin, INPUT);
-    duration_0 = pulseIn(pingPin, HIGH);
+    pinMode(PINGpin, INPUT);
+    duration_0 = pulseIn(PINGpin, HIGH);
     distance = microsecondsToInches(duration_0);
-    //if go forward is up do V
-    if( distance != 0 && angle > 75 && angle < 125
-        && distance < 30 && forWard==true )//checking middle
+    if(distance != 0 && distance < 15
+         && angle >= 20 && angle < 60 )
+        {
+          STOP();
+          forWard=false;
+          fLeft=false;
+          fRight=false;
+          //beenHere=false;
+          //Serial.print("A_2 ");
+        }
+    else if( distance != 0 && angle > 60
+        && angle < 120 && distance < 25 )//checking middle
     {
        STOP();
-       Serial.print("M ");
+       //Serial.print("M_2 ");
     }
-    else if( distance != 0 && distance < 15
-         && ( (angle >= 30 && angle < 75) 
-         ||   (angle > 125 && angle < 150) ) )
+    else if( distance != 0 && distance < 15 
+         && angle > 120 && angle < 170 )
         {
            STOP();
            forWard=false;
            fLeft=false;
            fRight=false;
            //beenHere=false;
-           Serial.print("A ");
+           //Serial.print("A_3 ");
         }//if
-    
-    
+  }
+  for(angle=175; angle>=10 ; angle-=10){
+    headServo.write(angle);
+    delay(17);
+    clearSensor();
+    pinMode(PINGpin, INPUT);
+    duration_0 = pulseIn(PINGpin, HIGH);
+    distance = microsecondsToInches(duration_0);
+    if(distance != 0 && distance < 15
+         && angle >= 20 && angle < 60
+         && forwardAgain==true )
+        {
+          STOP();
+          forWard=false;
+          fLeft=false;
+          fRight=false;
+          //beenHere=false;
+          //Serial.print("A_2 ");
+        }
+    else if( distance != 0 && angle > 60 
+          && angle < 120 && distance < 25 )//checking middle
+    {
+       STOP();
+       //Serial.print("M_2 ");
+    }
+    else if( distance != 0 && distance < 15 
+         && angle > 120 && angle < 170 ) 
+        {
+           STOP();
+           forWard=false;
+           fLeft=false;
+           fRight=false;
+           //beenHere=false;
+           //Serial.print("A_3 ");
+        }//if
+  }
+}  //loop
+  //headServo.write(10);
+  //delay(5);
+  /*TESTING*/
+  /*
+  Serial.print("FAR_RIGHT:");
+  Serial.print(FAR_RIGHT);
+  Serial.print(" RIGHT:");
+  Serial.print(RIGHT);
+  Serial.print(" MIDDLE:");
+  Serial.print(MIDDLE);
+  Serial.print(" LEFT:");
+  Serial.print(LEFT);
+  Serial.print(" FAR_LEFT:");
+  Serial.println(FAR_LEFT);
+  */
+  
+
+
+void clearSensor(){
+  pinMode(PINGpin, OUTPUT);
+  digitalWrite(PINGpin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PINGpin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(PINGpin, LOW);
+}  //clearSensor
+
+void goBackward( int sec ){
+  digitalWrite(BACK_BRAKE, LOW); 
+  analogWrite(3, 200);  //activate drive motor w/ 200 speed
+  digitalWrite(BACK_MOTOR, LOW);
+  delay(sec); 
+  forwardAgain=false;
+}
+void turnLeft(){
+  digitalWrite(FRONT_BRAKE, LOW);
+  digitalWrite(FRONT_MOTOR, LOW);
+  analogWrite(11, 255);  //activate turn motor
+}
+void turnRight(){
+  digitalWrite(FRONT_BRAKE, LOW);
+  digitalWrite(FRONT_MOTOR, HIGH);
+  analogWrite(11, 255);  //activate turn motor
+}  //turnRight()
+void goFORWARD(){
+  forWard=true;
+  digitalWrite(BACK_BRAKE, LOW);
+  digitalWrite(FRONT_BRAKE, HIGH);
+  digitalWrite(BACK_MOTOR, HIGH);
+  if(forwardAgain==true){
+    analogWrite(3,750);
+  }else{
+    analogWrite(3,225);  //activate SFast
+    forwardAgain=true;
+  }
+  //check90();
+}
+          /*CHECK THIS AGAIN*/
+void check90(){
+  for(angle = 50; angle >= 130; angle += 5){        
+    headServo.write(angle);
+    delay(15);
+    clearSensor();
+    pinMode(PINGpin, INPUT);
+    duration_0 = pulseIn(PINGpin, HIGH);
+    distance = microsecondsToInches(duration_0);
+    if( distance != 0 && angle > 75 && angle < 125
+          && distance < 35 )
+    {
+      STOP();
+      Serial.println("    < 35 **C90**");
+      //beenHere=true;
+    }
+    else goFORWARD();
+  }
+}  //check90
+void reverseAndGo_LEFT(int sec){
+ delay(75);
+ turnRight();
+ goBackward(sec);
+ STOP(); 
+}
+void reverseAndGo_RIGHT(int sec){
+ delay(75);
+ turnLeft();
+ goBackward(sec);
+ STOP();
+}
+void STOP(){
+  digitalWrite(BACK_BRAKE, HIGH);
+  digitalWrite(FRONT_BRAKE, HIGH);  //straight
+  delay(250);
+  obsCheck();
+}
+void obsCheck(){
+  long RIGHT=0, LEFT=0, distance=0,
+    MIDDLE=0, FAR_RIGHT=0, FAR_LEFT=0;
+  for(angle = 5; angle <= 170; angle += 10){        
+    headServo.write(angle);
+    //Serial.println();
+    //Serial.print("ANGLE: ");
+    //Serial.println(angle);
+    delay(125);
+    clearSensor();
+    pinMode(PINGpin, INPUT);
+    duration_0 = pulseIn(PINGpin, HIGH);
+    distance = microsecondsToInches(duration_0);
+    //if go forward is up do V
+
     Serial.println(distance);
     
     if(distance != 0 && distance < 10  
@@ -106,7 +260,7 @@ void loop(){
                RIGHT++;
              }
 
-    else if( distance != 0 && distance < 25 
+    else if( distance != 0 && distance < OBSTECALE 
               && angle >= 60 && angle < 120)
              {
                Serial.print(" ->");
@@ -130,21 +284,7 @@ void loop(){
                Serial.println(angle);
                FAR_LEFT++;
              }
-  }  //for 
-  //headServo.write(10);
-  //delay(5);
-  /*TESTING*/
-  /*Serial.print("FAR_RIGHT:");
-  Serial.print(FAR_RIGHT);
-  Serial.print(" RIGHT:");
-  Serial.print(RIGHT);
-  Serial.print(" MIDDLE:");
-  Serial.print(MIDDLE);
-  Serial.print(" LEFT:");
-  Serial.print(LEFT);
-  Serial.print(" FAR_LEFT:");
-  Serial.println(FAR_LEFT);
-  */
+  } 
               /* CHECK IF !=0 && equal 
                  RIGHT MIDDLE AND LEFT */
   if( RIGHT && MIDDLE && LEFT){
@@ -256,101 +396,7 @@ void loop(){
   }
       Serial.println();
       Serial.println();
-}  //loop
-
-void clearSensor(){
-  pinMode(pingPin, OUTPUT);
-  digitalWrite(pingPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(pingPin, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(pingPin, LOW);
-}  //clearSensor
-
-void goBackward( int sec ){
-  digitalWrite(BACK_BRAKE, LOW); 
-  analogWrite(3, 200);  //activate drive motor w/ 200 speed
-  digitalWrite(BACK_MOTOR, LOW);
-  delay(sec); 
-  forwardAgain=false;
-}
-void turnLeft(){
-  digitalWrite(FRONT_BRAKE, LOW);
-  digitalWrite(FRONT_MOTOR, LOW);
-  analogWrite(11, 255);  //activate turn motor
-}
-void turnRight(){
-  digitalWrite(FRONT_BRAKE, LOW);
-  digitalWrite(FRONT_MOTOR, HIGH);
-  analogWrite(11, 255);  //activate turn motor
-}  //turnRight()
-void goFORWARD(){
-  forWard=true;
-  digitalWrite(BACK_BRAKE, LOW);
-  digitalWrite(FRONT_BRAKE, HIGH);
-  digitalWrite(BACK_MOTOR, HIGH);
-  if(forwardAgain==true){
-    analogWrite(3,175);
-  }else{
-    analogWrite(3,225);  //activate SFast
-    forwardAgain=true;
-  }
-  check90();
-}
-          /*CHECK THIS AGAIN*/
-void check90(){
-  for(angle = 70; angle >= 130; angle += 5){        
-    headServo.write(angle);
-    delay(15);
-    clearSensor();
-    pinMode(pingPin, INPUT);
-    duration_0 = pulseIn(pingPin, HIGH);
-    distance = microsecondsToInches(duration_0);
-    if( distance != 0 && angle > 75 && angle < 125
-          && distance < 35 )
-    {
-      STOP();
-      Serial.println("    < 35");
-      //beenHere=true;
-    }
-    else goFORWARD();
-  }/*
-  headServo.write(110);
-  delay(5);
-  long duration_0, distance;
-  delay(25);
-  clearSensor();
-  pinMode(pingPin, INPUT);
-  duration_0 = pulseIn(pingPin, HIGH);
-  distance = microsecondsToInches(duration_0);
-  Serial.print(" check90: ");
-  Serial.println(distance);
-  if( distance != 0 && distance < 20 ){
-    STOP();
-    Serial.println("    < 20");
-    beenHere=true;
-  }else if(beenHere){
-    goBackward(500);
-    reverseAndGo_LEFT(2000);
-  }else goFORWARD();*/
-}
-void reverseAndGo_LEFT(int sec){
- delay(75);
- turnRight();
- goBackward(sec);
- STOP(); 
-}
-void reverseAndGo_RIGHT(int sec){
- delay(75);
- turnLeft();
- goBackward(sec);
- STOP();
-}
-void STOP(){
-  digitalWrite(BACK_BRAKE, HIGH);
-  digitalWrite(FRONT_BRAKE, HIGH);  //straight
-}
-
+}  //obsCheck()
 long microsecondsToInches(long microseconds)
 {
   return microseconds / 74 / 2;

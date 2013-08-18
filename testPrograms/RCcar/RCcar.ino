@@ -42,159 +42,17 @@ boolean forWard = false;
 boolean forwardAgain = false;
 //boolean beenHere=false;
 
-int data_UD, data_LR;
-
 void setup(){
-   Serial1.begin(9600);
-   Serial.begin(9600);
-   pinMode(34,OUTPUT);
-   pinMode(35,OUTPUT);
-   pinMode(31,OUTPUT);
-   pinMode(32,OUTPUT);
-   lcdSetup();
-   headServo.attach(SERVO_PIN);
-   carSetupAndStart(); 
+  lcdSetup();
+  headServo.attach(SERVO_PIN);
+  carSetupAndStart();
 
-   delay(500);
-}
+  Serial.begin(9600);
+}  //setup
+
 void loop(){
-  int Ucounter=-1, Lcounter=-1;
-  boolean UU=false, UUTR=false,
-          LL=false, LLTR=false,
-          driveAlone=false,
-          Udrive=false;
-  char Umsg[4];
-  char Lmsg[4];
-  while( Serial1.available() > 0){
-    digitalWrite(34,HIGH);
-    char inChar = Serial1.read();
-    //Serial.println(inChar);
-    if( inChar == 'B' ){
-      Udrive=false;
-      digitalWrite(32,HIGH);
-      digitalWrite(35,LOW);
-      digitalWrite(31,LOW);
-      Serial.println("DRIVE_ALONE");
-      driveAlone=true;
-      
-    }
-    if(UU){
-      Umsg[Ucounter] = inChar;
-      Ucounter++;
-    }
-    if( Ucounter==3) UU=false;    
-    if( inChar == 'U'){
-      Udrive=true;
-      driveAlone=false;
-      digitalWrite(35,HIGH);
-      Ucounter++;
-      UU=true;
-    }
-    if(LL){
-      Lmsg[Lcounter] = inChar;
-      Lcounter++;
-    }
-    if( Lcounter==3) LL=false;
-    if( inChar == 'L'){
-      Udrive=true;
-      driveAlone=false;
-      digitalWrite(31,HIGH);
-      Lcounter++;
-      LL=true;
-    }
-    
-    //else digitalWrite(31,LOW);
-    //Serial.println(inChar);
-  }
-  delay(150);
-  if(driveAlone){
-    Serial.println("DRIVE_ALONE_ON!");
-    selfDrive();
-  }
-  /////////////////////////////////////////////
-  //                YOU DRIVE               //
-  ////////////////////////////////////////////
-  else if(Udrive){
-    int OUT_UD = atoi(Umsg);  //129 | MIN:0 | MAX:255
-    int OUT_LR = atoi(Lmsg);  //128 | MIN:0 | MAX:255
-    //Serial.println(OUT_UD);
-    int LR = map(OUT_LR, 100, 355, 0, 255);
-    int UD = map(OUT_UD, 360, 615, 0, 255);
-    Serial.print(UD);
-    Serial.println(LR);
-    
-    if( (UD == 129 && LR == 128) || (UD < 0 && LR < 0)
-        || UD < 0){
-      Serial.println("STOP1");
-      digitalWrite(BACK_BRAKE, HIGH);
-      digitalWrite(FRONT_BRAKE, HIGH);
-    }
-    else if( UD >= 129 ){
-      //GO_STRAIGHT
-      if( LR > 128 ){
-       //GO RIGHT 
-       Serial.println("GORIGHT");
-       digitalWrite(FRONT_BRAKE, LOW);
-       digitalWrite(FRONT_MOTOR, HIGH);
-       analogWrite(11, LR);
-       digitalWrite(BACK_BRAKE, LOW);
-       digitalWrite(BACK_MOTOR, HIGH);
-       analogWrite(3,UD);
-      }else if( LR < 128 ){
-       //GO LEFT 
-       Serial.println("GOLEFT");
-       digitalWrite(FRONT_BRAKE, LOW);
-       digitalWrite(FRONT_MOTOR, LOW);
-       analogWrite(11, 255-LR);
-       digitalWrite(BACK_BRAKE, LOW);
-       digitalWrite(BACK_MOTOR, HIGH);
-       analogWrite(3,UD);
-      }else{
-        // GO STRAIGHT
-        Serial.println("GOSTRAIGHT");
-        digitalWrite(BACK_BRAKE, LOW);
-        digitalWrite(FRONT_BRAKE, HIGH);
-        digitalWrite(BACK_MOTOR, HIGH);
-        analogWrite(3,UD);
-      }
-    }else if( UD < 128){
-     //REVERSE 
-       if( LR > 128 ){
-         //reverse & TURN WHELE RIGHT
-         Serial.println("GOREVERSE& RIGHT");
-         digitalWrite(FRONT_BRAKE, LOW);
-         digitalWrite(FRONT_MOTOR, HIGH);
-         analogWrite(11, LR);
-         digitalWrite(BACK_BRAKE, LOW); 
-         analogWrite(3, 255-UD);
-         digitalWrite(BACK_MOTOR, LOW);
-       }else if( LR < 128){
-         //reverse & TURN WHELE LEFT
-         Serial.println("GOREVERSE&LEFT");
-         digitalWrite(FRONT_BRAKE, LOW);
-         digitalWrite(FRONT_MOTOR, LOW);
-         analogWrite(11, 255-LR);
-         digitalWrite(BACK_BRAKE, LOW); 
-         analogWrite(3, 255-UD);
-         digitalWrite(BACK_MOTOR, LOW);
-       }else{
-         //GO REVERSE
-         Serial.println("GOREVERSE");
-         digitalWrite(BACK_BRAKE, LOW); 
-         analogWrite(3, 255-UD);
-         digitalWrite(BACK_MOTOR, LOW);
-       }
-    }
-    else{
-     //STOP 
-     Serial.println("STOP");
-     digitalWrite(BACK_BRAKE, HIGH);
-     digitalWrite(FRONT_BRAKE, HIGH);
-    }
-    
-  }//else
-}//loop
-void selfDrive(){
+  //ledFORWARD();
+  
   //* CHECKING RIGHT | LEFT | MIDDLE 
   long RIGHT=0, LEFT=0, distance=0,
     MIDDLE=0, FAR_RIGHT=0, FAR_LEFT=0;
@@ -218,13 +76,13 @@ void selfDrive(){
           fLeft=false;
           fRight=false;
           //beenHere=false;
-          //Serial.print("A ");
+          Serial.print("A ");
         }
     else if( distance != 0 && angle > 75 && angle < 125
         && distance < 30 )//checking middle
     {
        STOP();
-       //Serial.print("M_ ");
+       Serial.print("M_ ");
     }
     else if( distance != 0 && distance < 15 
          &&   (angle > 125 && angle < 150) ) 
@@ -234,51 +92,51 @@ void selfDrive(){
            fLeft=false;
            fRight=false;
            //beenHere=false;
-           //Serial.print("A_11 ");
+           Serial.print("A_11 ");
         }//if
     
     
-    //Serial.println(distance);
+    Serial.println(distance);
     
     if(distance != 0 && distance < 10  
              && angle >= 20 && angle < 30 )
              {
                FAR_RIGHT++;
                //beenHere=false;
-               //Serial.print(" ->");
-               //Serial.println(angle);
+               Serial.print(" ->");
+               Serial.println(angle);
              }
 
     else if( distance != 0 && distance < OBSTECALE 
               && angle > 30 && angle < 60 )
              { 
-               //Serial.print(" ->");
-               //Serial.println(angle);
+               Serial.print(" ->");
+               Serial.println(angle);
                RIGHT++;
              }
 
     else if( distance != 0 && distance < 25 
               && angle >= 60 && angle < 120)
              {
-               //Serial.print(" ->");
-               //Serial.println(angle);
+               Serial.print(" ->");
+               Serial.println(angle);
                MIDDLE++;
              }
 
     else if( distance != 0 && distance < OBSTECALE 
              && angle >=120 && angle < 150)
              {
-               //Serial.print(" ->");
-               //Serial.println(angle);
+               Serial.print(" ->");
+               Serial.println(angle);
                LEFT++;
              }
 
     else if( distance != 0 && distance < 10 
              && angle >= 150 )
              {
-               //Serial.print(" ->");
+               Serial.print(" ->");
                //beenHere=false;
-               //Serial.println(angle);
+               Serial.println(angle);
                FAR_LEFT++;
              }
   }  //for 
@@ -298,13 +156,13 @@ void selfDrive(){
           fLeft=false;
           fRight=false;
           //beenHere=false;
-          //Serial.print("A_2 ");
+          Serial.print("A_2 ");
         }
     else if( distance != 0 && angle > 75 && angle < 125
         && distance < 30 && forWard==true )//checking middle
     {
        STOP();
-       //Serial.print("M_2 ");
+       Serial.print("M_2 ");
     }
     else if( distance != 0 && distance < 15 
          &&   (angle > 125 && angle < 150) ) 
@@ -314,7 +172,7 @@ void selfDrive(){
            fLeft=false;
            fRight=false;
            //beenHere=false;
-           //Serial.print("A_3 ");
+           Serial.print("A_3 ");
         }//if
   }
   //headServo.write(10);
@@ -335,26 +193,26 @@ void selfDrive(){
               /* CHECK IF !=0 && equal 
                  RIGHT MIDDLE AND LEFT */
   if( RIGHT && MIDDLE && LEFT){
-      //Serial.print("1");
+      Serial.print("1");
       if( RIGHT < LEFT && RIGHT < MIDDLE){
-       //Serial.print("a");
+       Serial.print("a");
        //GO RIGHT 
        reverseAndGo_RIGHT(1500);
       }else if( LEFT < RIGHT && LEFT < MIDDLE ){
-       // Serial.print("b");
+        Serial.print("b");
        //GO LEFT 
        reverseAndGo_LEFT(1500);
        /* CHECK THESE STATMENTS*/
       }else if( RIGHT == MIDDLE && RIGHT < LEFT ){
         //GO RIGHT
         reverseAndGo_RIGHT(2000);
-        //Serial.print("N");
+        Serial.print("N");
       }else if( MIDDLE == LEFT && MIDDLE < RIGHT ){
         //GO LEFT
         reverseAndGo_LEFT(2000);
-        //Serial.print("m");
+        Serial.print("m");
       }else{
-        //Serial.print("c");
+        Serial.print("c");
         //GO BACKWARD AND REVERSE  RIGHT!!!
        // RIGHT:2 MIDDLE:2 LEFT:3
        //   A1c
@@ -364,59 +222,59 @@ void selfDrive(){
         reverseAndGo_LEFT(2000);
       }
   }else if( RIGHT && MIDDLE ){
-        //Serial.print("2");
+        Serial.print("2");
      if( RIGHT < MIDDLE ){
-       //Serial.print("d");
+       Serial.print("d");
       //GO RIGHT
       reverseAndGo_RIGHT(1500);
      }else{  //includes equal
-    // Serial.print("e");
+     Serial.print("e");
       //GO LEFT
       reverseAndGo_LEFT(1500);
      }
     }else if( LEFT && MIDDLE ){
-         // Serial.print("3");
+          Serial.print("3");
       if( LEFT < MIDDLE ){
-       // Serial.print("f");
+        Serial.print("f");
        //GO LEFT
        reverseAndGo_LEFT(1500);
       }else{  //includes equal
-       // Serial.print("g");
+        Serial.print("g");
        //GO RIGHT
        reverseAndGo_RIGHT(1500);
       }
   }else if( LEFT && RIGHT ){
-     // Serial.print("4");
+      Serial.print("4");
      if( LEFT < RIGHT ){
-      // Serial.print("h");
+       Serial.print("h");
         //GO LEFT
         reverseAndGo_LEFT(1500);
       }else{  //includes equal
-       // Serial.print("i");
+        Serial.print("i");
        //GO RIGHT 
          reverseAndGo_RIGHT(1500);
       }
   }else if( RIGHT ){
-      //Serial.print("5");
+      Serial.print("5");
       //GO LEFT
       reverseAndGo_LEFT(1500);
   }else if( MIDDLE ){
-     // Serial.print("6");
+      Serial.print("6");
      //GO EITHER WAY  ????
      reverseAndGo_RIGHT(1500);
   }else if( LEFT ){
-    // Serial.print("7");
+     Serial.print("7");
      //GO RIGHT 
    reverseAndGo_RIGHT(1500);
   }else if( FAR_RIGHT || FAR_LEFT ){
-    //Serial.print("8");
+    Serial.print("8");
     if( FAR_RIGHT < FAR_LEFT ){
-     // Serial.print("j");
+      Serial.print("j");
       if(fLeft==true){
-      //  Serial.print("z");
+        Serial.print("z");
         reverseAndGo_RIGHT(1000);
       }else{
-       // Serial.print("l");
+        Serial.print("l");
           fLeft=true;
           //merge right
           delay(25);
@@ -424,11 +282,11 @@ void selfDrive(){
           goFORWARD();
       }
     }else{
-      //Serial.print("k");
+      Serial.print("k");
       if(fRight==true){
         reverseAndGo_LEFT(1000);
       }else{
-        //Serial.print("y");
+        Serial.print("y");
          fRight=true;
          //merge left 
          delay(25);
@@ -437,11 +295,14 @@ void selfDrive(){
       }
     }
   }else{
-    //Serial.print("9");
+    Serial.print("9");
      //GO FORAWRD
      goFORWARD();
   }
-}//driveAlone
+      Serial.println();
+      Serial.println();
+}  //loop
+
 void clearSensor(){
   pinMode(pingPin, OUTPUT);
   digitalWrite(pingPin, LOW);
@@ -481,7 +342,25 @@ void goFORWARD(){
   }
   //check90();
 }
-
+          /*CHECK THIS AGAIN*/
+void check90(){
+  for(angle = 50; angle >= 130; angle += 5){        
+    headServo.write(angle);
+    delay(15);
+    clearSensor();
+    pinMode(pingPin, INPUT);
+    duration_0 = pulseIn(pingPin, HIGH);
+    distance = microsecondsToInches(duration_0);
+    if( distance != 0 && angle > 75 && angle < 125
+          && distance < 35 )
+    {
+      STOP();
+      Serial.println("    < 35 **C90**");
+      //beenHere=true;
+    }
+    else goFORWARD();
+  }
+}  //check90
 void reverseAndGo_LEFT(int sec){
  delay(75);
  turnRight();
@@ -525,10 +404,17 @@ void carSetupAndStart(){
   pinMode(LED_GRE_1, OUTPUT); 
   pinMode(LED_GRE_2, OUTPUT); 
   pinMode(LED_GRE_3, OUTPUT); 
+  
   ledAll_ON();
+  delay(500);
+  ledAll_OFF();
+  delay(750);
+  ledAll_ON();
+  
   counterVal++;
-  //goFORWARD();
+  goFORWARD();
 }
+
 void ledAll_ON(){
   digitalWrite(LED_GRE_1,HIGH);
   digitalWrite(LED_GRE_2,HIGH);
@@ -537,46 +423,23 @@ void ledAll_ON(){
   digitalWrite(LED_RED_2,HIGH);
   digitalWrite(LED_RED_3,HIGH);
 }
-  /*
+void ledAll_OFF(){
+  digitalWrite(LED_GRE_1,LOW);
+  digitalWrite(LED_GRE_2,LOW);
+  digitalWrite(LED_GRE_3,LOW);
+  digitalWrite(LED_RED_1,LOW);
+  digitalWrite(LED_RED_2,LOW);
+  digitalWrite(LED_RED_3,LOW);
+}
+void ledFORWARD(){
+  digitalWrite(LED_GRE_1,HIGH);
+  digitalWrite(LED_GRE_3,HIGH);
+  digitalWrite(LED_RED_1,HIGH);
+  digitalWrite(LED_RED_3,HIGH);
   
-  if( UD > 129 ){
-    //STRAIGHT
-    if( LR > 128 ){
-     //GO RIGHT 
-    }else if( LR < 128 ){
-     //GO LEFT 
-    }else{
-      // GO STRAIGHT
-    }
-  }else if( UD < 129){
-   //REVERSE 
-     if( LR > 128 ){
-       //reverse & TURN WHELE RIGHT
-     }else if( LR < 128){
-       //reverse & TURN WHELE LEFT
-     }else{
-       //GO REVERSE
-     }
-  }
-  else{
-   //STOP 
-  }
-  
-  
-  Serial.print("END   UD=");
-  for(unsigned i=0; i <3 ; i++){
-   //Serial.print(Umsg[i]);
-   UD[i]=Umsg[i] - '0';
-   //Serial.print(" UD: ");
-   Serial.print(UD[i]);
-  }
-  Serial.print("  ,L=");
-  for(unsigned i=0; i <3 ; i++){
-   //Serial.print(Lmsg[i]);
-   LR[i]=Lmsg[i] - '0';
-   Serial.print(LR[i]);
-  }
-  int UUUU = atoi(Umsg);
-  Serial.println(UUUU);
-  Serial.println();*/
-
+  digitalWrite(LED_GRE_2,LOW);
+  digitalWrite(LED_RED_2,LOW);
+  delay(500);
+  digitalWrite(LED_GRE_2,HIGH);
+  digitalWrite(LED_RED_2,HIGH);
+}

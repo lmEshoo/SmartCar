@@ -65,6 +65,7 @@ void loop(){
           Udrive=false;
   char Umsg[4];
   char Lmsg[4];
+  delay(250);
   while( Serial1.available() > 0){
     digitalWrite(34,HIGH);
     char inChar = Serial1.read();
@@ -78,11 +79,6 @@ void loop(){
       driveAlone=true;
       
     }
-    if(UU){
-      Umsg[Ucounter] = inChar;
-      Ucounter++;
-    }
-    if( Ucounter==3) UU=false;    
     if( inChar == 'U'){
       Udrive=true;
       driveAlone=false;
@@ -90,6 +86,12 @@ void loop(){
       Ucounter++;
       UU=true;
     }
+    if(UU){
+      Umsg[Ucounter] = inChar;
+      Ucounter++;
+    }
+    if( Ucounter==3) UU=false;    
+    
     if(LL){
       Lmsg[Lcounter] = inChar;
       Lcounter++;
@@ -115,12 +117,21 @@ void loop(){
   //                YOU DRIVE               //
   ////////////////////////////////////////////
   else if(Udrive){
+    Serial.println("YOU_ON!");
     int OUT_UD = atoi(Umsg);  //129 | MIN:0 | MAX:255
     int OUT_LR = atoi(Lmsg);  //128 | MIN:0 | MAX:255
-    //Serial.println(OUT_UD);
+    for(unsigned i=0; i <3 ; i++){
+     Serial.print(Umsg[i]);
+     //UD[i]=Umsg[i] - '0';
+     //Serial.print(" UD: ");
+     //Serial.print(UD[i]);
+    }
+    Serial.println(OUT_UD);
     int LR = map(OUT_LR, 100, 355, 0, 255);
     int UD = map(OUT_UD, 360, 615, 0, 255);
+    LR = constrain( LR, 0, 255);
     Serial.print(UD);
+    Serial.print("jhkjh ");
     Serial.println(LR);
     
     if( (UD == 129 && LR == 128) || (UD < 0 && LR < 0)
@@ -131,7 +142,7 @@ void loop(){
     }
     else if( UD >= 129 ){
       //GO_STRAIGHT
-      if( LR > 128 ){
+      if( LR > 128 && LR < 255){
        //GO RIGHT 
        Serial.println("GORIGHT");
        digitalWrite(FRONT_BRAKE, LOW);

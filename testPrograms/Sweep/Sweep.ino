@@ -26,16 +26,18 @@ void setup()
   lcd.print("    WELCOME");
   lcd.setCursor(1,1);
   lcd.print("TO LENNY's ");
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object 
+  myservo.attach(28);  // attaches the servo on pin 9 to the servo object 
 } 
  
  
 void loop() 
 { 
-
+  myservo.write(110);
+  delay(250);
+/*
   for(pos = 0; pos <= 180; pos += 30)  // goes from 0 degrees to 180 degrees 
   {                                  // in steps of 1 degree 
     myservo.write(pos);              // tell servo to go to position in variable 'pos' 
-    delay(200);                       // waits 15ms for the servo to reach the position 
-  } 
+    delay(1);                       // waits 15ms for the servo to reach the position 
+  } */
 } //0: 13, 180: 3 = > 180<0 

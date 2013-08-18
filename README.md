@@ -1,4 +1,0 @@
-SmartCar
-========
-
-$martCar using Arduino
